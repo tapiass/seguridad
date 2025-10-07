@@ -42,32 +42,44 @@ def mapa_inicial(texto):
 
     letras_es = [l for l, _ in sorted(frecuencias_es.items(), key=lambda x: -x[1])]
     return dict(zip(letras_texto, letras_es))
-
 def sustituir(texto, equivalencias):
+    """Aplica el mapa de sustitución al texto y muestra cuántos cambios hizo."""
     resultado = []
+    cambios = 0
     for c in texto:
         if c.isalpha():
-            nuevo = equivalencias.get(c.lower(), c)
-            resultado.append(nuevo.upper() if c.isupper() else nuevo)
+            base = c.lower()
+            if base in equivalencias:
+                nuevo = equivalencias[base]
+                if nuevo != base:
+                    cambios += 1
+                if c.isupper():
+                    nuevo = nuevo.upper()
+                resultado.append(nuevo)
+            else:
+                resultado.append(c)
         else:
             resultado.append(c)
+    print(f"[Depuración] Letras sustituidas en esta pasada: {cambios}")
     return ''.join(resultado)
-
+    
 def imprimir_mapa(mapa):
     print("\nSustituciones actuales:")
     for k in sorted(mapa):
         print(f"{k} → {mapa[k]}")
     print("-" * 35)
 
-def ajustar_mapa(mapa, texto):
+def ajustar_mapa(mapa, texto_original):
     print("\nIntroduce cambios con el formato  letra_cifrada=letra_real  (ej: q=e)")
     print("Escribe 'salir' o 'q' para terminar.\n")
 
+    # Empezamos con el texto inicial descifrado
+    texto_actual = sustituir(texto_original, mapa)
+
     while True:
         imprimir_mapa(mapa)
-        descifrado = sustituir(texto, mapa)
         print("\nTexto descifrado (vista previa):\n")
-        print(descifrado[:1000])
+        print(texto_actual[:1000])
         print("\n----------------------------")
 
         entrada = input("Cambio: ").strip().lower()
@@ -87,12 +99,17 @@ def ajustar_mapa(mapa, texto):
         mapa[cifrada] = real
 
         print(f"Actualizado: {cifrada} → {real}\n")
+
+        # Aplica solo el cambio nuevo sobre el texto ya descifrado
+        texto_actual = sustituir(texto_actual, {cifrada: real})
+
         print("\nTexto actualizado:\n")
-        print(sustituir(texto, mapa)[:1000])
+        print(texto_actual[:1000])
         print("\n----------------------------")
 
     print("\n=== RESULTADO FINAL ===\n")
-    print(sustituir(texto, mapa))
+    print(texto_actual)
+
 
 # ------------------- EJECUCIÓN -------------------
 
